@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>افزودن ملک جدید</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- تضمین نمایش صحیح در موبایل -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            min-height: 200vh;
+            padding: 20px 10px; /* فاصله بهتر در موبایل */
+        }
+
+        .form-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        /* گروه‌بندی فیلدها */
+        .grid-4-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .grid-3-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea,
+        #map {
+            width: 100%;
+            padding: 7px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        /* نقشه — ارتفاع بیشتر، مخصوصاً در موبایل */
+        #map {
+            min-height: 250px;
+            height: 250px;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        /* امکانات */
+        .amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .amenities label {
+            flex: 1 1 23%;
+            min-width: 130px;
+            font-size: 13px;
+        }
+
+        button[type="submit"] {
+            padding: 10px 18px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1976D2;
+        }
+
+        /* ریسپانسیو — موبایل و تبلت */
+        @media (max-width: 992px) {
+            .grid-4-columns,
+            .grid-3-columns {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .amenities label {
+                flex: 1 1 45%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .grid-4-columns,
+            .grid-3-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .amenities label {
+                flex: 1 1 100%;
+            }
+
+            #map {
+                min-height: 250px;
+                height: 250px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>سامانه ثبت ملک دقیق</h2>
+
+    <form method="post" action="/admin/property/add">
+        <!-- عنوان ملک -->
+        <div class="form-group">
+            <label>عنوان ملک:</label>
+            <input type="text" name="title" required>
+        </div>
+
+        <!-- نقشه -->
+        <div class="form-group">
+            <label>انتخاب موقعیت روی نقشه:</label>
+            <div id="map"></div>
+        </div>
+
+        <!-- مختصات جغرافیایی (مخفی) -->
+        <input type="hidden" id="latitude" name="latitude" required>
+        <input type="hidden" id="longitude" name="longitude" required>
+
+        <!-- گروه 1: نوع ملک، وضعیت نما، قیمت کل، قیمت هر متر -->
+        <div class="grid-4-columns">
+            <div class="form-group">
+                <label>نوع ملک:</label>
+                <select name="property_type">
+                    <option value="زمین مشارکت">زمین مشارکت</option>
+                    <option value="آپارتمان">آپارتمان</option>
+                    <option value="ویلایی">ویلایی</option>
+                    <option value="تجاری">تجاری</option>
+                    <option value="پیش فروش">پیش فروش</option>
+                    <option value="پیش فروش">رهن و اجاره</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>وضعیت نما:</label>
+                <input type="text" name="facade_status" placeholder="مثلاً: سفال">
+            </div>
+            <div class="form-group">
+                <label>قیمت کل (تومان):</label>
+                <input type="number" name="price_total" required>
+            </div>
+            <div class="form-group">
+                <label>قیمت هر متر (تومان):</label>
+                <input type="number" name="price_per_meter" required>
+            </div>
+        </div>
+
+        <!-- گروه 2: طبقه، سال ساخت، تعداد واحد، تعداد اتاق -->
+        <div class="grid-4-columns">
+            <div class="form-group">
+                <label>طبقه:</label>
+                <input type="number" name="floor">
+            </div>
+            <div class="form-group">
+                <label>سال ساخت:</label>
+                <input type="number" name="year_built">
+            </div>
+            <div class="form-group">
+                <label>تعداد واحد در ساختمان:</label>
+                <input type="number" name="units_in_building">
+            </div>
+            <div class="form-group">
+                <label>تعداد اتاق:</label>
+                <input type="number" name="bedrooms">
+            </div>
+        </div>
+
+        <!-- محله، طول، عرض، متراژ، وضعیت -->
+        <div class="grid-4-columns">
+            <div class="form-group">
+                <label>محله:</label>
+                <input type="text" name="neighborhood" placeholder="مثلاً: دانشگاه (از وارد کردن کلماتی نظیر خیابان و بلوار و... خودداری کنید!)">
+            </div>
+            <div class="form-group">
+                <label>طول (متر):</label>
+                <input type="number" name="length">
+            </div>
+            <div class="form-group">
+                <label>عرض (متر):</label>
+                <input type="number" name="width">
+            </div>
+
+            <!-- متراژ -->
+            <div class="form-group">
+                <label>متراژ (متر مربع):</label>
+                <input type="number" name="size" placeholder="مثلاً: 85" required>
+            </div>
+        </div>
+
+        <!-- آدرس دقیق -->
+        <div class="form-group">
+            <label>آدرس دقیق:</label>
+            <textarea name="detailed_address" placeholder="خیابان، کوچه، پلاک..."></textarea>
+        </div>
+
+        <!-- امکانات -->
+        <div class="form-group">
+            <label>امکانات:</label>
+            <div class="amenities">
+                <label><input type="checkbox" name="amenities" value="بالکن"> بالکن</label>
+                <label><input type="checkbox" name="amenities" value="انباری"> انباری</label>
+                <label><input type="checkbox" name="amenities" value="آسانسور"> آسانسور</label>
+                <label><input type="checkbox" name="amenities" value="استخر"> استخر</label>
+            </div>
+        </div>
+
+        <!-- توضیحات -->
+        <div class="form-group">
+            <label>توضیحات:</label>
+            <textarea name="description" placeholder="توضیحات بیشتر..."></textarea>
+        </div>
+
+        <!-- دکمه ثبت -->
+        <div class="form-group">
+            <button type="submit">ثبت ملک</button>
+        </div>
+    </form>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // زاهدان
+    const map = L.map('map').setView([29.4549, 60.8845], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker;
+
+    map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+    });
+</script>
+
+</body>
+</html>

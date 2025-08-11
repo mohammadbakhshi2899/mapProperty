@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ویرایش ملک - {{ property.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #e3f2fd, #ffe0b2);
+            margin-bottom: 30vh;
+            margin-top: 40vh;
+            min-height: 180vh;
+            padding: 200px 20px 60px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .form-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+            font-size: 24px;
+        }
+        .grid-4-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .grid-3-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea,
+        #map {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        #map {
+            height: 200px;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        /* امکانات */
+        .amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .amenities label {
+            flex: 1 1 23%;
+            min-width: 150px;
+            white-space: nowrap;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button[type="submit"]:hover {
+            background-color: #fb8c00;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #9e9e9e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+        }
+        .back-btn:hover {
+            background-color: #757575;
+        }
+        @media (max-width: 992px) {
+            .grid-4-columns,
+            .grid-3-columns {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 150px 15px 50px;
+            }
+            .form-container {
+                padding: 20px;
+            }
+            .grid-4-columns,
+            .grid-3-columns {
+                grid-template-columns: 1fr;
+            }
+            .amenities label {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>✏️ ویرایش ملک</h2>
+    <form method="post" action="/admin/property/update/{{ property.id }}">
+        <!-- عنوان ملک -->
+        <div class="form-group">
+            <label>عنوان ملک:</label>
+            <input type="text" name="title" value="{{ property.title }}" required>
+        </div>
+
+        <!-- نقشه -->
+        <div class="form-group">
+            <label>انتخاب موقعیت روی نقشه:</label>
+            <div id="map"></div>
+        </div>
+        <!-- مختصات جغرافیایی (مخفی) -->
+        <input type="hidden" id="latitude" name="latitude" value="{{ property.latitude }}">
+        <input type="hidden" id="longitude" name="longitude" value="{{ property.longitude }}">
+
+        <!-- گروه 1: نوع ملک، وضعیت نما، قیمت کل، قیمت هر متر -->
+        <div class="grid-4-columns">
+            <div class="form-group">
+                <label>نوع ملک:</label>
+                <select name="property_type">
+                    <option value="زمین مشارکت" {% if property.property_type == "زمین مشارکت" %}selected{% endif %}>زمین مشارکت</option>
+                    <option value="آپارتمان" {% if property.property_type == "آپارتمان" %}selected{% endif %}>آپارتمان</option>
+                    <option value="ویلایی" {% if property.property_type == "ویلایی" %}selected{% endif %}>ویلایی</option>
+                    <option value="تجاری" {% if property.property_type == "تجاری" %}selected{% endif %}>تجاری</option>
+                    <option value="پیش فروش" {% if property.property_type == "پیش فروش" %}selected{% endif %}>پیش فروش</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>وضعیت نما:</label>
+                <input type="text" name="facade_status" value="{{ property.facade_status }}" required>
+            </div>
+            <div class="form-group">
+                <label>قیمت کل (تومان):</label>
+                <input type="number" name="price" value="{{ property.price }}" required>
+            </div>
+            <div class="form-group">
+                <label>قیمت هر متر (تومان):</label>
+                <input type="number" name="pricePerMeter" value="{{ property.pricePerMeter }}" required>
+            </div>
+        </div>
+
+        <!-- گروه 2: طبقه، سال ساخت، تعداد واحد، تعداد اتاق -->
+        <div class="grid-4-columns">
+            <div class="form-group">
+                <label>طبقه:</label>
+                <input type="number" name="floorNumber" value="{{ property.floorNumber }}" required>
+            </div>
+            <div class="form-group">
+                <label>سال ساخت:</label>
+                <input type="number" name="builtYear" value="{{ property.builtYear }}" required>
+            </div>
+            <div class="form-group">
+                <label>تعداد واحد در ساختمان:</label>
+                <input type="number" name="units_in_building" value="{{ property.units_in_building }}">
+            </div>
+            <div class="form-group">
+                <label>تعداد اتاق:</label>
+                <input type="number" name="bedrooms" value="{{ property.bedrooms }}">
+            </div>
+        </div>
+
+        <!-- محله، طول، عرض، متراژ، وضعیت -->
+        <div class="grid-3-columns">
+            <div class="form-group">
+                <label>محله:</label>
+                <input type="text" name="neighborhood" value="{{ property.neighborhood }}" required>
+            </div>
+            <div class="form-group">
+                <label>طول (متر):</label>
+                <input type="number" name="length" value="{{ property.length }}" required>
+            </div>
+            <div class="form-group">
+                <label>عرض (متر):</label>
+                <input type="number" name="width" value="{{ property.width }}" required>
+            </div>
+
+            <!-- متراژ -->
+            <div class="form-group">
+                <label>متراژ (متر مربع):</label>
+                <input type="number" name="area" value="{{ property.size }}" required>
+            </div>
+
+            <!-- وضعیت فعال/غیرفعال -->
+            <div class="form-group">
+                <label>وضعیت:</label>
+                <select name="status">
+                    <option value="فعال" {% if property.status == "فعال" %}selected{% endif %}>فعال</option>
+                    <option value="غیرفعال" {% if property.status == "غیرفعال" %}selected{% endif %}>غیرفعال</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- آدرس دقیق -->
+        <div class="form-group">
+            <label>آدرس دقیق:</label>
+            <textarea name="detailed_address" placeholder="خیابان، کوچه، پلاک...">{{ property.detailed_address }}</textarea>
+        </div>
+
+        <!-- امکانات -->
+        <div class="form-group">
+            <label>امکانات:</label>
+            <div class="amenities">
+                {% set amenities_list = property.amenities.split(',') if property.amenities else [] %}
+                <label><input type="checkbox" name="amenities" value="بالکن" {% if "بالکن" in amenities_list %}checked{% endif %}> بالکن</label>
+                <label><input type="checkbox" name="amenities" value="انباری" {% if "انباری" in amenities_list %}checked{% endif %}> انباری</label>
+                <label><input type="checkbox" name="amenities" value="آسانسور" {% if "آسانسور" in amenities_list %}checked{% endif %}> آسانسور</label>
+                <label><input type="checkbox" name="amenities" value="استخر" {% if "استخر" in amenities_list %}checked{% endif %}> استخر</label>
+            </div>
+        </div>
+
+        <!-- توضیحات -->
+        <div class="form-group">
+            <label>توضیحات:</label>
+            <textarea name="description" placeholder="توضیحات بیشتر...">{{ property.description }}</textarea>
+        </div>
+
+        <!-- دکمه ذخیره -->
+        <button type="submit">ذخیره تغییرات</button>
+    </form>
+    <br>
+    <a href="/admin/properties" class="back-btn">بازگشت به لیست ملک‌ها</a>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // مختصات فعلی
+    const lat = parseFloat("{{ property.latitude }}");
+    const lng = parseFloat("{{ property.longitude }}");
+    let currentLat = lat;
+    let currentLng = lng;
+
+    // ایجاد نقشه
+    const map = L.map('map').setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // مارکر
+    let marker = L.marker([lat, lng]).addTo(map);
+
+    // کلیک روی نقشه
+    map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        currentLat = lat;
+        currentLng = lng;
+        marker.setLatLng(e.latlng);
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+</script>
+</body>
+</html>

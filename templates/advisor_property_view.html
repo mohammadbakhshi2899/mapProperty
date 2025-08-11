@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جزئیات ملک - {{ property.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .details {
+            padding: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .info-item span {
+            font-size: 15px;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .amenities {
+            margin-bottom: 25px;
+        }
+
+        .amenities label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .amenities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .amenity-tag {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid #bbdefb;
+        }
+
+        .advisor-info {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #dcedc8;
+        }
+
+        .advisor-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #33691e;
+        }
+
+        .advisor-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #558b2f;
+        }
+
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                margin: 20px 10px;
+            }
+
+            .details {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ property.title }}</h1>
+            <p>جزئیات ملک ثبت شده</p>
+        </div>
+
+        <div class="details">
+            <!-- اطلاعات اصلی ملک -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>محله</label>
+                    <span>{{ property.neighborhood }}</span>
+                </div>
+                <div class="info-item">
+                    <label>متراژ (متر مربع)</label>
+                    <span>{{ property.size }} متر</span>
+                </div>
+                <div class="info-item">
+                    <label>قیمت کل</label>
+                    <span>{{ "{:,}".format(property.price|int) }} تومان</span>
+                </div>
+                <div class="info-item">
+                    <label>قیمت هر متر</label>
+                    <span>{{ "{:,}".format(property.pricePerMeter|int) }} تومان</span>
+                </div>
+                <div class="info-item">
+                    <label>وضعیت</label>
+                    <span style="color: #fff; background-color: {% if property.status == 'فعال' %}#28a745{% else %}#dc3545{% endif %}; border: none;">
+                        {{ property.status }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <label>وضعیت نما</label>
+                    <span>{{ property.facade_status }}</span>
+                </div>
+                <div class="info-item">
+                    <label>تعداد اتاق خواب</label>
+                    <span>{{ property.bedrooms or "ندارد" }}</span>
+                </div>
+                <div class="info-item">
+                    <label>تعداد واحد در ساختمان</label>
+                    <span>{{ property.units_in_building or "ناشناخته" }}</span>
+                </div>
+                <div class="info-item">
+                    <label>تاریخ ثبت</label>
+                    <span>{{ property.RegisterDateNational }}</span>
+                </div>
+            </div>
+
+            <!-- امکانات -->
+            <div class="amenities">
+                <label>امکانات</label>
+                <div class="amenities-list">
+                    {% set amenities_list = property.amenities.split(',') if property.amenities else [] %}
+                    {% for amenity in amenities_list %}
+                        {% if amenity.strip() %}
+                            <span class="amenity-tag">{{ amenity.strip() }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- اطلاعات مشاور -->
+            <div class="advisor-info">
+                <h3>مشاور ثبت‌کننده</h3>
+                <p><strong>نام مشاور:</strong> {{ advisor.username }}</p>
+                <p><strong>شماره تماس:</strong> {{ advisor.phone or "ثبت نشده" }}</p>
+                <p><strong>ایمیل:</strong> {{ advisor.email or "ثبت نشده" }}</p>
+            </div>
+        </div>
+
+        <a href="/advisor/dashboard" class="back-btn">بازگشت به داشبورد</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>پنل مشاور</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* تنظیمات کلی */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #c8e6c9, #ffecb3); /* سبز ملایم → زرد کمرنگ */
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .page-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* دکمه خروج */
+        .logout-btn {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            padding: 10px 16px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* عنوان */
+        .dashboard-title {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 50px;
+            color: #1a1a1a;
+        }
+
+        /* کارت‌ها */
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            flex: 1;
+            min-width: 280px;
+            max-width: 350px;
+            padding: 25px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+        /* رنگ کارت‌ها */
+        .add      { border-top: 5px solid #2ecc71; }  /* سبز */
+        .search   { border-top: 5px solid #3498db; }  /* آبی */
+        .my-list  { border-top: 5px solid #9c27b0; }  /* بنفش (برای ملک‌های شخصی) */
+
+        /* ریسپانسیو */
+        @media (max-width: 768px) {
+            body {
+                padding: 30px 15px;
+            }
+
+            .logout-btn {
+                position: static;
+                display: block;
+                width: 100%;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .dashboard-title {
+                font-size: 22px;
+                margin-bottom: 30px;
+            }
+
+            .card-container {
+                gap: 20px;
+            }
+
+            .card {
+                min-width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <!-- دکمه خروج -->
+    <a href="/" class="logout-btn">خروج</a>
+
+    <!-- عنوان -->
+    <h1 class="dashboard-title">پنل مدیریت مشاور</h1>
+
+    <!-- کارت‌های عملیاتی -->
+    <div class="card-container">
+        <!-- افزودن ملک -->
+        <a href="/advisor/property/add" class="card add">
+            <div class="icon">➕</div>
+            <h3>افزودن ملک</h3>
+            <p>ثبت اطلاعات یک ملک جدید در سیستم.</p>
+        </a>
+
+        <!-- جستجوی ملک -->
+        <a href="/advisor/property/search" class="card search">
+            <div class="icon">🔍</div>
+            <h3>جستجوی ملک</h3>
+            <p>جستجوی پیشرفته در میان ملک‌های ثبت شده.</p>
+        </a>
+
+        <!-- مشاهده ملک‌های من -->
+        <a href="/advisor/properties/my" class="card my-list">
+            <div class="icon">🏠</div>
+            <h3>مشاهده ملک‌های من</h3>
+            <p>لیست تمام ملک‌هایی که شما ثبت کرده‌اید.</p>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

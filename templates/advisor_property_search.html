@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جستجوی ملک - ادمین</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            min-height: 170vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+            background-color: white;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background-color: #9e9e9e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #757575;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* گرید دو ستونه */
+        .grid-2-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button[type="submit"] {
+            padding: 12px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1976D2;
+        }
+
+        /* جدول نتایج */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 14px 16px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+
+        .results-table th {
+            background-color: #f5f5f5;
+            color: #333;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .results-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .actions a {
+            display: inline-block;
+            margin: 0 4px;
+            padding: 6px 10px;
+            font-size: 13px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .view {
+            background-color: #4CAF50;
+        }
+
+        .edit {
+            background-color: #FF9800;
+        }
+
+        .delete {
+            background-color: #f44336;
+        }
+
+        .actions a:hover {
+            opacity: 0.9;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+            background-color: #fdfdfd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* صفحه‌بندی */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 8px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #007bff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pagination .current {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            font-weight: bold;
+        }
+
+        .pagination .disabled {
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        /* ریسپانسیو */
+        @media (max-width: 600px) {
+            .search-container {
+                margin: 15px;
+                padding: 20px;
+            }
+
+            .grid-2-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+
+            .actions a {
+                margin: 2px;
+                padding: 5px 8px;
+                font-size: 12px;
+            }
+
+            button[type="submit"] {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <h2>🔍 جستجوی ملک</h2>
+    <a href="/admin/dashboard" class="back-btn">بازگشت به داشبورد</a>
+
+    <!-- فرم جستجو -->
+    <form method="get" action="/advisor/property/search">
+        <!-- محله -->
+        <div class="form-group">
+            <label>محله:</label>
+            <input type="text" name="neighborhood" placeholder="نام محله..." value="{{ request.query_params.get('neighborhood', '') }}">
+        </div>
+
+<!--        &lt;!&ndash; شماره تماس مالک &ndash;&gt;-->
+<!--        <div class="form-group">-->
+<!--            <label>شماره تماس مالک:</label>-->
+<!--            <input type="tel" name="owner_phone" placeholder="09123456789" value="{{ request.query_params.get('owner_phone', '') }}">-->
+<!--        </div>-->
+
+        <!-- قیمت -->
+        <div class="grid-2-columns">
+            <div class="form-group">
+                <label>قیمت از (تومان):</label>
+                <input type="number" name="min_price" placeholder="مثلاً 10000000" value="{{ request.query_params.get('min_price', '') }}">
+            </div>
+            <div class="form-group">
+                <label>تا (تومان):</label>
+                <input type="number" name="max_price" placeholder="مثلاً 20000000" value="{{ request.query_params.get('max_price', '') }}">
+            </div>
+        </div>
+
+        <!-- متراژ -->
+        <div class="grid-2-columns">
+            <div class="form-group">
+                <label>متراژ از:</label>
+                <input type="number" name="min_area" placeholder="مثلاً 50" value="{{ request.query_params.get('min_area', '') }}">
+            </div>
+            <div class="form-group">
+                <label>تا:</label>
+                <input type="number" name="max_area" placeholder="مثلاً 150" value="{{ request.query_params.get('max_area', '') }}">
+            </div>
+        </div>
+
+        <!-- نوع ملک -->
+        <div class="form-group">
+            <label>نوع ملک:</label>
+            <select name="property_type">
+                <option value="">همه</option>
+                <option value="آپارتمان" {% if request.query_params.get('property_type') == 'آپارتمان' %}selected{% endif %}>آپارتمان</option>
+                <option value="ویلایی" {% if request.query_params.get('property_type') == 'ویلایی' %}selected{% endif %}>ویلایی</option>
+                <option value="تجاری" {% if request.query_params.get('property_type') == 'تجاری' %}selected{% endif %}>تجاری</option>
+                <option value="زمین مشارکت" {% if request.query_params.get('property_type') == 'زمین مشارکت' %}selected{% endif %}>زمین مشارکت</option>
+                <option value="پیش فروش" {% if request.query_params.get('property_type') == 'پیش فروش' %}selected{% endif %}>پیش فروش</option>
+            </select>
+        </div>
+
+        <!-- دکمه جستجو -->
+        <div class="form-group">
+            <button type="submit">جستجو</button>
+        </div>
+    </form>
+
+    <!-- نتایج جستجو -->
+    {% if results %}
+        {% if results|length == 0 %}
+            <div class="no-results">
+                هیچ ملکی با این معیارها یافت نشد.
+            </div>
+        {% else %}
+            <div style="margin-top: 30px;">
+                <h3>نتایج جستجو ({{ total_count }} مورد)</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>عنوان</th>
+                            <th>محله</th>
+                            <th>قیمت</th>
+                            <th>نوع معامله</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prop in results %}
+                        <tr>
+                            <td>{{ prop.title }}</td>
+                            <td>{{ prop.neighborhood }}</td>
+                            <td>{{ "{:,}".format(prop.price|int) }} تومان</td>
+                            <td>{{ prop.deal_type }}</td>
+                            <td class="actions">
+                                <a href="/advisor/property/view/{{ prop.id }}" class="view">مشاهده</a>
+                                </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- صفحه‌بندی -->
+                <div class="pagination">
+                    <!-- دکمه قبلی -->
+                    {% if page > 1 %}
+                        <a href="?{{ query_string }}&page={{ page - 1 }}">قبلی</a>
+                    {% else %}
+                        <span class="disabled">قبلی</span>
+                    {% endif %}
+
+                    <!-- صفحات -->
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == page %}
+                            <span class="current">{{ p }}</span>
+                        {% else %}
+                            <a href="?{{ query_string }}&page={{ p }}">{{ p }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- دکمه بعدی -->
+                    {% if page < total_pages %}
+                        <a href="?{{ query_string }}&page={{ page + 1 }}">بعدی</a>
+                    {% else %}
+                        <span class="disabled">بعدی</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="no-results">
+            برای نمایش نتایج، فیلترهای خود را تنظیم و دکمه جستجو را بزنید.
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

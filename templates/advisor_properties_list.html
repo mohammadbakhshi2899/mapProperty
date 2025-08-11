@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ملک‌های من</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #c8e6c9, #ffecb3);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .page-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            padding: 10px 16px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 16px;
+            background-color: #9e9e9e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background-color: #757575;
+        }
+
+        /* جدول */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            color: #333;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .actions {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            display: inline-block;
+            padding: 6px 10px;
+            margin: 0 4px;
+            font-size: 13px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .view { background-color: #4CAF50; }
+        .edit { background-color: #FF9800; }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 16px;
+            color: #777;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 30px 15px;
+            }
+
+            .logout-btn {
+                position: static;
+                display: block;
+                width: 100%;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            th, td {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+
+            .action-btn {
+                margin: 2px 0;
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <!-- دکمه خروج -->
+    <a href="/" class="logout-btn">خروج</a>
+
+    <!-- عنوان -->
+    <h1>🏠 ملک‌های من</h1>
+
+    <!-- دکمه بازگشت -->
+    <a href="/advisor/dashboard" class="back-btn">بازگشت به داشبورد</a>
+
+    <!-- جدول یا پیام خالی -->
+    {% if properties and properties|length > 0 %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>عنوان ملک</th>
+                    <th>نوع ملک</th>
+                    <th>محله</th>
+                    <th>قیمت کل</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prop in properties %}
+                <tr>
+                    <td>{{ prop.title }}</td>
+                    <td>{{ prop.property_type }}</td>
+                    <td>{{ prop.neighborhood }}</td>
+                    <td>{{ "{:,}".format(prop.price|int) }} تومان</td>
+                    <td class="actions">
+                        <a href="/admin/property/view/{{ prop.id }}" class="action-btn view">👁️ مشاهده</a>
+                        <a href="/admin/property/edit/{{ prop.id }}" class="action-btn edit">✏️ ویرایش</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>شما هنوز ملکی ثبت نکرده‌اید.</p>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

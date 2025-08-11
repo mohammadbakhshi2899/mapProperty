@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>گزارش‌های ادمین</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #e3f2fd, #ffe0b2);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            padding: 10px 16px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .back-btn, .download-pdf {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .back-btn {
+            background-color: #9e9e9e;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .download-pdf {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .back-btn:hover, .download-pdf:hover {
+            opacity: 0.9;
+        }
+
+        .filter-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            text-align: right;
+        }
+
+        .filter-form label {
+            font-weight: bold;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .filter-form input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+
+        .filter-form button {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .filter-form button:hover {
+            background-color: #1976D2;
+        }
+
+        /* دو نمودار دایره‌ای کنار هم */
+        .pie-charts-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .chart-item {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-item h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .report-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .report-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .pie-charts-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <a href="/" class="logout-btn">خروج</a>
+    <h1>📊 گزارش‌های مدیریتی</h1>
+
+    <a href="/admin/dashboard" class="back-btn">بازگشت به داشبورد</a>
+    <a href="#" class="download-pdf" onclick="downloadPDF(event)">دریافت گزارش PDF</a>
+
+    <!-- فرم فیلتر -->
+    <div class="filter-form">
+        <form method="GET">
+            <label>از تاریخ:</label>
+            <input type="date" name="start_date" value="{{ request.query_params.get('start_date', '') }}">
+            <label>تا تاریخ:</label>
+            <input type="date" name="end_date" value="{{ request.query_params.get('end_date', '') }}">
+            <button type="submit">اعمال فیلتر</button>
+            <button type="button" onclick="resetFilter()">همه دوره‌ها</button>
+        </form>
+    </div>
+
+    <!-- دو نمودار دایره‌ای کنار هم -->
+    <div class="pie-charts-row">
+        <div class="chart-item">
+            <h2>توزیع ملک‌ها بر اساس نوع معامله</h2>
+            <div class="chart-container">
+                <canvas id="dealTypeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-item">
+            <h2>وضعیت فعال/غیرفعال ملک‌ها</h2>
+            <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- نمودار مشاوران -->
+    <div class="report-section">
+        <h2>تعداد ملک‌های ثبت شده توسط مشاوران</h2>
+        <div class="chart-container">
+            <canvas id="advisorChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<!-- jsPDF و html2canvas برای خروجی PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    // داده‌ها از سرور
+    const chartData = {
+        deal_labels: {{ chart_data.deal_labels | tojson }},
+        deal_values: {{ chart_data.deal_values | tojson }},
+        status_labels: {{ chart_data.status_labels | tojson }},
+        status_values: {{ chart_data.status_values | tojson }},
+        advisor_names: {{ chart_data.advisor_names | tojson }},
+        advisor_counts: {{ chart_data.advisor_counts | tojson }}
+    };
+
+    // اطمینان از بارگذاری کامل صفحه
+    document.addEventListener("DOMContentLoaded", function () {
+        try {
+            const { deal_labels, deal_values } = chartData;
+            const { status_labels, status_values } = chartData;
+            const { advisor_names, advisor_counts } = chartData;
+
+            // نمودار نوع معامله
+            new Chart(document.getElementById('dealTypeChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: deal_labels,
+                    datasets: [{
+                        data: deal_values,
+                        backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#e74c3c'],
+                        borderWidth: 1
+                    }]
+                },
+                plugins: [ChartDataLabels],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (value, ctx) => value,
+                            align: 'center'
+                        }
+                    }
+                }
+            });
+
+            // نمودار وضعیت
+            new Chart(document.getElementById('statusChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: status_labels,
+                    datasets: [{
+                        data: status_values,
+                        backgroundColor: ['#27ae60', '#e74c3c'],
+                        borderWidth: 1
+                    }]
+                },
+                plugins: [ChartDataLabels],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (value, ctx) => value,
+                            align: 'center'
+                        }
+                    }
+                }
+            });
+
+            // نمودار مشاوران
+            new Chart(document.getElementById('advisorChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: advisor_names,
+                    datasets: [{
+                        label: 'تعداد ملک‌های ثبت شده',
+                        data: advisor_counts,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("خطا در رسم نمودار:", error);
+        }
+    });
+
+    function resetFilter() {
+        document.querySelector('input[name="start_date"]').value = '';
+        document.querySelector('input[name="end_date"]').value = '';
+        document.querySelector('form').submit();
+    }
+
+
+    // تابع دانلود PDF
+    function downloadPDF(event) {
+        event.preventDefault();
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        doc.setFontSize(20);
+        doc.text("گزارش مدیریتی", pageWidth / 2, 20, { align: 'center' });
+
+        const sections = document.querySelectorAll('.report-section, .chart-item');
+        let y = 40;
+
+        sections.forEach((section, index) => {
+            html2canvas(section).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 180;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                if (y + imgHeight > 280) {
+                    doc.addPage();
+                    y = 20;
+                }
+
+                doc.addImage(imgData, 'PNG', 15, y, imgWidth, imgHeight);
+                y += imgHeight + 10;
+
+                if (index === sections.length - 1) {
+                    doc.save('گزارش-ادمین.pdf');
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مشاهده ملک - {{ property.title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* --- تنظیمات اولیه — حذف هرگونه مشکل layout --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            min-height: 220vh; /* بیشتر از 100vh — اسکرول ایجاد میکنه */
+            padding: 20px 20px 60px; /* فاصله خیلی زیاد از بالا */
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .view-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1a1a1a;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2196F3;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 8px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            font-size: 16px;
+        }
+
+        .info-item strong {
+            min-width: 160px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .amenities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .amenity-tag {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            border: 1px solid #90caf9;
+        }
+
+        #map {
+            height: 350px;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 24px;
+            background-color: #9e9e9e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .back-btn:hover {
+            background-color: #757575;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 150px 15px 50px;
+            }
+
+            .view-container {
+                padding: 25px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #map {
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="view-container">
+    <h2>🏠 {{ property.title }}</h2>
+
+    <!-- نقشه -->
+    <div class="section">
+        <div class="section-title">📍 موقعیت ملک روی نقشه</div>
+        <div id="map"></div>
+    </div>
+
+    <!-- اطلاعات ملک -->
+    <div class="section">
+        <div class="section-title">📌 اطلاعات ملک</div>
+        <div class="info-grid">
+            <div class="info-item"><strong>نوع ملک:</strong> {{ property.property_type }}</div>
+            <div class="info-item"><strong>متراژ:</strong> {{ property.size }} متر</div>
+            <div class="info-item"><strong>قیمت کل:</strong> {{ "{:,}".format(property.price|int) }} تومان</div>
+            <div class="info-item"><strong>قیمت هر متر:</strong> {{ "{:,}".format(property.pricePerMeter|int) }} تومان</div>
+            <div class="info-item"><strong>تعداد اتاق:</strong> {{ property.bedrooms or "—" }}</div>
+            <div class="info-item"><strong>سال ساخت:</strong> {{ property.builtYear }}</div>
+            <div class="info-item"><strong>طبقه:</strong> {{ property.floorNumber }}</div>
+            <div class="info-item"><strong>وضعیت نما:</strong> {{ property.facade_status }}</div>
+            <div class="info-item"><strong>تعداد واحد:</strong> {{ property.units_in_building or "—" }}</div>
+            <div class="info-item"><strong>ابعاد:</strong> {{ property.length }} × {{ property.width }} متر</div>
+            <div class="info-item"><strong>محله:</strong> {{ property.neighborhood }}</div>
+            <div class="info-item"><strong>آدرس دقیق:</strong> {{ property.detailed_address }}</div>
+            <div class="info-item"><strong>وضعیت:</strong> {{ "فعال" if property.status == "active" else "غیرفعال" }}</div>
+            <div class="info-item"><strong>تاریخ ثبت (شمسی):</strong> {{ property.RegisterDatePersian }}</div>
+        </div>
+    </div>
+
+    <!-- امکانات -->
+    {% if property.amenities %}
+    <div class="section">
+        <div class="section-title">✨ امکانات</div>
+        <div class="amenities-list">
+            {% for amenity in property.amenities.split(',') %}
+            <span class="amenity-tag">{{ amenity.strip() }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- توضیحات -->
+    {% if property.description %}
+    <div class="section">
+        <div class="section-title">📝 توضیحات</div>
+        <p style="line-height: 1.8; color: #555;">{{ property.description }}</p>
+    </div>
+    {% endif %}
+
+    <!-- اطلاعات مالک -->
+    {% if owner %}
+    <div class="section">
+        <div class="section-title">👤 اطلاعات مالک</div>
+        <div class="info-grid">
+            <div class="info-item"><strong>نام:</strong> {{ owner.name }}</div>
+            <div class="info-item"><strong>نام خانوادگی:</strong> {{ owner.Family }}</div>
+            <div class="info-item"><strong>تلفن:</strong> {{ owner.phone }}</div>
+            <div class="info-item"><strong>نتیجه آزمون DISC:</strong> {{ owner.DISC_test or "—" }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- اطلاعات مشاور -->
+    {% if advisor %}
+    <div class="section">
+        <div class="section-title">🧑‍💼 مشاور ثبت کننده</div>
+        <div class="info-grid">
+            <div class="info-item"><strong>نام کاربری:</strong> {{ advisor.username }}</div>
+            <div class="info-item"><strong>نام:</strong> {{ advisor.first_name or "—" }}</div>
+            <div class="info-item"><strong>نام خانوادگی:</strong> {{ advisor.last_name or "—" }}</div>
+            <div class="info-item"><strong>شماره تماس:</strong> {{ advisor.phone or "—" }}</div>
+            <div class="info-item"><strong>نقش:</strong> {{ "ادمین" if advisor.role == "admin" else "مشاور" }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- دکمه بازگشت -->
+    <a href="/admin/properties" class="back-btn">بازگشت به لیست ملک‌ها</a>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const lat = parseFloat("{{ property.latitude }}");
+    const lng = parseFloat("{{ property.longitude }}");
+
+    if (isNaN(lat) || isNaN(lng)) {
+        console.error("Invalid coordinates");
+        const map = L.map('map').setView([29.4549, 60.8845], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([29.4549, 60.8845]).addTo(map).bindPopup("موقعیت نامشخص");
+    } else {
+        const map = L.map('map').setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([lat, lng]).addTo(map).bindPopup(`
+            <b>{{ property.title|e }}</b><br>
+            {{ property.detailed_address|e }}<br>
+            <small>عرض: ${lat}<br>طول: ${lng}</small>
+        `).openPopup();
+    }
+</script>
+
+</body>
+</html>

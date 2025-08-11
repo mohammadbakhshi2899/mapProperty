@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ثبت اطلاعات مالک</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        button[type="submit"] {
+            padding: 12px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1976D2;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 16px;
+            background-color: #9e9e9e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #757575;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>ثبت اطلاعات مالک</h2>
+
+    <!-- فرم -->
+    <form method="post" action="/admin/owner/add">
+
+        <!-- property_id از طریق hidden field -->
+        <input type="hidden" name="property_id" value="{{ property_id }}">
+
+        <!-- اسم -->
+        <div class="form-group">
+            <label>اسم:</label>
+            <input type="text" name="name" required>
+        </div>
+
+        <!-- فامیل -->
+        <div class="form-group">
+            <label>فامیل:</label>
+            <input type="text" name="Family" required>
+        </div>
+
+        <!-- تلفن -->
+        <div class="form-group">
+            <label>تلفن:</label>
+            <input type="tel" name="phone" placeholder="09123456789" required>
+        </div>
+
+        <!-- نتیجه آزمون -->
+        <div class="form-group">
+            <label>نتیجه آزمون:</label>
+            <input type="text" name="DISC_test" maxlength="4" placeholder="عدد ۴ رقمی" pattern="\d{4}" required>
+            <small>لطفاً فقط یک عدد ۴ رقمی وارد کنید.</small>
+        </div>
+
+        <!-- دکمه ثبت -->
+        <div class="form-group">
+            <button type="submit">ذخیره اطلاعات مالک</button>
+        </div>
+    </form>
+
+    <a href="/dashboard_admin" class="back-btn">بازگشت</a>
+</div>
+
+</body>
+</html>
