@@ -228,7 +228,7 @@
             <!-- اطلاعات مشاور -->
             <div class="advisor-info">
                 <h3>مشاور ثبت‌کننده</h3>
-                <p><strong>نام مشاور:</strong> {{ advisor.username }}</p>
+                <p><strong>نام مشاور:</strong> {{ advisor.name + " " + advisor.family }}</p>
                 <p><strong>شماره تماس:</strong> {{ advisor.phone or "ثبت نشده" }}</p>
                 <p><strong>ایمیل:</strong> {{ advisor.email or "ثبت نشده" }}</p>
             </div>

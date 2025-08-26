@@ -263,28 +263,31 @@
 
         <!-- متراژ -->
         <div class="grid-2-columns">
+             <!-- نوع ملک -->
             <div class="form-group">
-                <label>متراژ از:</label>
-                <input type="number" name="min_area" placeholder="مثلاً 50" value="{{ request.query_params.get('min_area', '') }}">
+                <label>نوع ملک:</label>
+                <select name="property_type">
+                    <option value="">همه</option>
+                    <option value="آپارتمان" {% if request.query_params.get('property_type') == 'آپارتمان' %}selected{% endif %}>آپارتمان</option>
+                    <option value="ویلایی" {% if request.query_params.get('property_type') == 'ویلایی' %}selected{% endif %}>ویلایی</option>
+                    <option value="تجاری" {% if request.query_params.get('property_type') == 'تجاری' %}selected{% endif %}>تجاری</option>
+                    <option value="زمین مشارکت" {% if request.query_params.get('property_type') == 'زمین مشارکت' %}selected{% endif %}>زمین مشارکت</option>
+                    <option value="پیش فروش" {% if request.query_params.get('property_type') == 'پیش فروش' %}selected{% endif %}>پیش فروش</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label>تا:</label>
-                <input type="number" name="max_area" placeholder="مثلاً 150" value="{{ request.query_params.get('max_area', '') }}">
+            <div>
+                <div class="form-group">
+                <label>تعداد اتاق:</label>
+                <input type="number" name="room_number" placeholder="3 " value="{{ request.query_params.get('room_number', '') }}">
             </div>
+
+            </div>
+        </div>
+        <div class="grid-1-columns">
+
         </div>
 
-        <!-- نوع ملک -->
-        <div class="form-group">
-            <label>نوع ملک:</label>
-            <select name="property_type">
-                <option value="">همه</option>
-                <option value="آپارتمان" {% if request.query_params.get('property_type') == 'آپارتمان' %}selected{% endif %}>آپارتمان</option>
-                <option value="ویلایی" {% if request.query_params.get('property_type') == 'ویلایی' %}selected{% endif %}>ویلایی</option>
-                <option value="تجاری" {% if request.query_params.get('property_type') == 'تجاری' %}selected{% endif %}>تجاری</option>
-                <option value="زمین مشارکت" {% if request.query_params.get('property_type') == 'زمین مشارکت' %}selected{% endif %}>زمین مشارکت</option>
-                <option value="پیش فروش" {% if request.query_params.get('property_type') == 'پیش فروش' %}selected{% endif %}>پیش فروش</option>
-            </select>
-        </div>
+
 
         <!-- دکمه جستجو -->
         <div class="form-group">

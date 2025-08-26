@@ -2,23 +2,40 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لیست کاربران</title>
+    <title>مدیریت کاربران</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        .dashboard-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        .dashboard-title {
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            min-height: 150vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* کانتینر با عرض مناسب — متناسب با جدول */
+        .container {
+            max-width: 900px; /* عرض مناسب برای جدول 4 ستونه */
+            min-width: 110vh;
+            margin: 30px auto;
+            padding: 25px;
+            background-color: white;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
             text-align: center;
-            font-size: 24px;
             color: #333;
             margin-bottom: 20px;
+            font-size: 22px;
         }
 
         .back-btn {
@@ -37,163 +54,297 @@
             background-color: #757575;
         }
 
-        .add-user-btn {
-            display: inline-block;
-            margin: 15px 0 30px;
-            padding: 12px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
+        /* فرم جستجو */
+        .search-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-form input,
+        .search-form select,
+        .search-form button {
+            padding: 10px;
+            border: 1px solid #ccc;
             border-radius: 6px;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-
-        .add-user-btn:hover {
-            background-color: #45a049;
-        }
-
-        /* ریسپانسیو: جدول در موبایل اسکرول داشته باشه */
-        .table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
-        }
-
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            min-width: 600px; /* حداقل عرض برای اسکرول در موبایل */
-        }
-
-        .user-table th,
-        .user-table td {
-            padding: 14px 18px;
-            text-align: right;
-            border-bottom: 1px solid #eee;
-            white-space: nowrap;
-        }
-
-        .user-table th {
-            background-color: #f8f8f8;
-            color: #333;
-            font-weight: bold;
             font-size: 14px;
         }
 
-        .user-table tr:hover {
+        .search-form input,
+        .search-form select {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .search-form button[type="submit"] {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            min-width: 100px;
+            font-weight: bold;
+        }
+
+        .search-form button[type="submit"]:hover {
+            background-color: #1976D2;
+        }
+
+        .search-form button[type="button"] {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            min-width: 100px;
+            font-weight: bold;
+        }
+
+        .search-form button[type="button"]:hover {
+            background-color: #7b1fa2;
+        }
+
+        /* جدول کاربران — مهم: عرض 100% و کنترل فاصله */
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 14px 18px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            white-space: nowrap; /* جلوگیری از شکسته شدن متن */
+        }
+
+        .users-table th {
+            background-color: #f5f5f5;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .users-table tr:hover {
             background-color: #f9f9f9;
         }
 
+        /* ستون عملیات — فاصله مناسب بین دکمه‌ها */
         .actions {
             white-space: nowrap;
-            text-align: center;
+            width: 230px;
+            text-align: right;
         }
 
-        .action-btn {
+        .actions a {
             display: inline-block;
-            margin: 4px 0;
-            padding: 8px 12px;
+            margin: 0 5px;
+            padding: 6px 10px;
+            font-size: 13px;
             border-radius: 6px;
             text-decoration: none;
-            font-size: 13px;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
+            color: white;
+            transition: all 0.3s ease;
         }
 
         .view {
             background-color: #4CAF50;
-            color: white;
         }
 
         .edit {
             background-color: #FF9800;
-            color: white;
         }
 
         .delete {
             background-color: #f44336;
-            color: white;
         }
 
-        .action-btn:hover {
+        .actions a:hover {
             opacity: 0.9;
         }
 
-        /* ریسپانسیو برای صفحه‌های کوچک */
+        /* وضعیت کاربر */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-active {
+            background-color: #28a745;
+        }
+
+        .status-inactive {
+            background-color: #dc3545;
+        }
+
+        /* صفحه‌بندی */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 8px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #007bff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pagination .current {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            font-weight: bold;
+        }
+
+        .pagination .disabled {
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            font-style: italic;
+            background-color: #fdfdfd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* ریسپانسیو — برای موبایل، دکمه‌ها کوچکتر ولی همچنان کنار هم */
         @media (max-width: 768px) {
-            .dashboard-container {
-                margin: 20px;
-                padding: 15px;
+            .container {
+                margin: 15px;
+                padding: 20px;
+                width: 95%;
             }
 
-            .add-user-btn {
-                display: block;
-                text-align: center;
-                margin: 15px auto 25px;
+            .search-form {
+                flex-direction: column;
             }
 
-            .dashboard-title {
-                font-size: 20px;
+            .users-table th,
+            .users-table td {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+
+            .actions a {
+                margin: 0 4px;
+                padding: 5px 8px;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2>👥 مدیریت کاربران</h2>
+        <a href="/admin/dashboard" class="back-btn">بازگشت به داشبورد</a>
 
-<div class="dashboard-container">
-    <h2 class="dashboard-title">مدیریت کاربران</h2>
-    <a href="/admin/dashboard" class="back-btn">بازگشت به مدیریت اطلاعات</a>
-    <a href="/admin/user/add" class="add-user-btn">➕ افزودن کاربر جدید</a>
+        <!-- فرم جستجو -->
+        <form method="get" class="search-form">
+            <input type="text" name="search" placeholder="جستجو (نام کاربری)" value="{{ request.query_params.get('search', '') }}">
+            <select name="role">
+                <option value="">همه نقش‌ها</option>
+                <option value="admin" {% if request.query_params.get('role') == 'admin' %}selected{% endif %}>ادمین</option>
+                <option value="advisor" {% if request.query_params.get('role') == 'advisor' %}selected{% endif %}>مشاور</option>
+                <option value="user" {% if request.query_params.get('role') == 'user' %}selected{% endif %}>کاربر عادی</option>
+            </select>
+            <button type="submit">جستجو</button>
+            <button type="button" onclick="resetSearch()">حذف فیلتر</button>
+        </form>
 
-    <div class="table-wrapper">
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>نام کاربری</th>
-                    <th>ایمیل</th>
-                    <th>نقش</th>
-                    <th>وضعیت</th>
-                    <th>عملیات</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        {% if user.role == "admin" %}
-                            👮 ادمین
-                        {% elif user.role == "advisor" %}
-                            🧑‍💼 مشاور
+        <!-- نتایج -->
+        {% if users %}
+            {% if users|length == 0 %}
+                <div class="no-results">
+                    هیچ کاربری با این معیارها یافت نشد.
+                </div>
+            {% else %}
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>نام کاربری</th>
+                            <th>نقش</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>
+                                <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if user.is_active %}فعال{% else %}غیرفعال{% endif %}
+                                </span>
+                            </td>
+                            <td class="actions">
+                                <a href="/admin/user/view/{{ user.id }}" class="view">مشاهده</a>
+                                <a href="/admin/user/edit/{{ user.id }}" class="edit">ویرایش</a>
+                                <a href="/admin/user/delete/{{ user.id }}" class="delete" onclick="return confirm('آیا از حذف این کاربر مطمئن هستید؟')">حذف</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- صفحه‌بندی -->
+                <div class="pagination">
+                    {% if page > 1 %}
+                        <a href="?{{ query_string }}&page={{ page - 1 }}">قبلی</a>
+                    {% else %}
+                        <span class="disabled">قبلی</span>
+                    {% endif %}
+
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == page %}
+                            <span class="current">{{ p }}</span>
                         {% else %}
-                            {{ user.role }}
+                            <a href="?{{ query_string }}&page={{ p }}">{{ p }}</a>
                         {% endif %}
-                    </td>
-                    <td>
-                        {% if user.status == "active" %}
-                            ✅ فعال
-                        {% elif user.status == "inactive" %}
-                            ❌ غیرفعال
-                        {% elif user.status == "pending" %}
-                            ⏳ در انتظار
-                        {% endif %}
-                    </td>
-                    <td class="actions">
-                        <a href="/admin/user/view/{{ user.id }}" class="action-btn view">👁️ مشاهده</a>
-                        <a href="/admin/user/edit/{{ user.id }}" class="action-btn edit">✏️ ویرایش</a>
-                        <a href="/admin/user/delete/{{ user.id }}" class="action-btn delete" onclick="return confirm('آیا مطمئن هستید؟')">🗑️ حذف</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                    {% endfor %}
 
+                    {% if page < total_pages %}
+                        <a href="?{{ query_string }}&page={{ page + 1 }}">بعدی</a>
+                    {% else %}
+                        <span class="disabled">بعدی</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-results">
+                هیچ کاربری وجود ندارد.
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function resetSearch() {
+            window.location.href = "/admin/users";
+        }
+    </script>
 </body>
 </html>

@@ -238,11 +238,43 @@ async def admin_manage(request: Request, admin: models.User = Depends(dependenci
     return templates.TemplateResponse("admin_manage_info.html", {"request": request})
 
 @app.get("/admin/users", response_class=HTMLResponse)
-async def admin_users(request: Request, db: Session = Depends(get_db), admin:models.User = Depends(dependencies.get_current_admin)):
-    if admin.role != "admin":
-        return RedirectResponse(url="/", status_code=303)
-    users = db.query(models.User).all()
-    return templates.TemplateResponse("admin_users.html", {"request": request, "users": users})
+async def admin_users(
+    request: Request,
+    search: str = None,
+    role: str = None,
+    page: int = 1,
+    db: Session = Depends(get_db)
+):
+    ITEMS_PER_PAGE = 10
+    offset = (page - 1) * ITEMS_PER_PAGE
+
+    query = db.query(models.User)
+
+    if search and search !='':
+        query = query.filter(
+            (models.User.username.contains(search)) | (models.User.email.contains(search))
+        )
+    if role and role != "":
+        query = query.filter(models.User.role == role)
+
+    total_count = query.count()
+    total_pages = (total_count + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+
+    users = query.offset(offset).limit(ITEMS_PER_PAGE).all()
+
+    # ساخت query_string برای صفحه‌بندی
+    params = dict(request.query_params)
+    params.pop('page', None)
+    query_string = urlencode(params)
+
+    return templates.TemplateResponse("admin_users.html", {
+        "request": request,
+        "users": users,
+        "total_count": total_count,
+        "total_pages": total_pages,
+        "page": page,
+        "query_string": query_string
+    })
 
 ####################################################property################################################################
 @app.get("/admin/property/{property_id}/owner", response_class=HTMLResponse)
@@ -463,6 +495,7 @@ async def admin_search(
     max_price = None,
     min_area = None,
     max_area = None,
+    room_number = None,
     property_type= None,
     page: int = 1,
     db: Session = Depends(get_db)
@@ -486,6 +519,9 @@ async def admin_search(
     if max_area and max_area != "":
         max_area = int(max_area)
         query = query.filter(models.Property.size <= max_area)
+    if room_number and room_number != "":
+        room_number = int(room_number)
+        query = query.filter(models.Property.bedrooms == room_number)
     # if property_type:
     #     query = query.filter(models.Property.property_type == property_type)
 
