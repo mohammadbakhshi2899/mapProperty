@@ -197,7 +197,6 @@
             <div class="info-item"><strong>نام:</strong> {{ owner.name }}</div>
             <div class="info-item"><strong>نام خانوادگی:</strong> {{ owner.Family }}</div>
             <div class="info-item"><strong>تلفن:</strong> {{ owner.phone }}</div>
-            <div class="info-item"><strong>نتیجه آزمون DISC:</strong> {{ owner.DISC_test or "—" }}</div>
         </div>
     </div>
     {% endif %}
@@ -208,8 +207,8 @@
         <div class="section-title">🧑‍💼 مشاور ثبت کننده</div>
         <div class="info-grid">
             <div class="info-item"><strong>نام کاربری:</strong> {{ advisor.username }}</div>
-            <div class="info-item"><strong>نام:</strong> {{ advisor.first_name or "—" }}</div>
-            <div class="info-item"><strong>نام خانوادگی:</strong> {{ advisor.last_name or "—" }}</div>
+            <div class="info-item"><strong>نام:</strong> {{ advisor.name or "—" }}</div>
+            <div class="info-item"><strong>نام خانوادگی:</strong> {{ advisor.family or "—" }}</div>
             <div class="info-item"><strong>شماره تماس:</strong> {{ advisor.phone or "—" }}</div>
             <div class="info-item"><strong>نقش:</strong> {{ "ادمین" if advisor.role == "admin" else "مشاور" }}</div>
         </div>

@@ -426,7 +426,6 @@ async def save_owner(
     name: str = Form(...),
     Family: str = Form(...),
     phone: str = Form(...),
-    DISC_test: str = Form(None),
     db: Session = Depends(get_db),
     user: models.User = Depends(dependencies.get_current_user)
 ):
@@ -440,7 +439,7 @@ async def save_owner(
         name=name,
         Family=Family,
         phone=phone,
-        DISC_test=DISC_test  # میتونه None باشه
+        DISC_test=str(1234)  # میتونه None باشه
     )
 
     db.add(new_owner)
@@ -646,15 +645,60 @@ async def my_properties(request: Request, db: Session = Depends(get_db),
     })
 
 # فرم جستجو
+@app.get("/advisor/properties/my", response_class=HTMLResponse)
+async def my_properties(
+        request: Request,
+        db: Session = Depends(get_db),
+        current_user: models.User = Depends(dependencies.get_current_user)
+):
+    # فقط ملک‌هایی که با این مشاور ثبت شدن
+    properties = db.query(models.Property).filter(models.Property.adviosor_id == current_user.id).all()
+
+    return templates.TemplateResponse("advisor_properties_list.html", {
+        "request": request,
+        "properties": properties
+    })
+
+
+@app.get("/advisor/property/view/{property_id}", response_class=HTMLResponse)
+async def view_property_for_advisor(
+    property_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    # دریافت ملک
+    property = db.query(models.Property).filter(models.Property.id == property_id).first()
+    if not property:
+        raise HTTPException(status_code=404, detail="ملک یافت نشد")
+
+    # دریافت مشاور
+    advisor = db.query(models.User).filter(models.User.id == property.adviosor_id).first()
+    if not advisor:
+        raise HTTPException(status_code=404, detail="مشاور یافت نشد")
+
+    return templates.TemplateResponse("advisor_property_view.html", {
+        "request": request,
+        "property": property,
+        "advisor": advisor
+    })
+@app.get("/hello/{name}")
+async def say_hello(name: str):
+    return {"message": f"Hello {name}"}
+
+
+
+
+
 @app.get("/advisor/property/search", response_class=HTMLResponse)
 async def advisor_search(
     request: Request,
-    neighborhood: str = None,
-    min_price: int = None,
-    max_price: int = None,
-    min_area: int = None,
-    max_area: int = None,
-    property_type: str = None,
+    neighborhood=None,
+    min_price=None,
+    max_price=None,
+    min_area=None,
+    max_area=None,
+    room_number=None,
+    property_type=None,
     page: int = 1,
     db: Session = Depends(get_db)
 ):
@@ -677,6 +721,9 @@ async def advisor_search(
     if max_area and max_area != "":
         max_area = int(max_area)
         query = query.filter(models.Property.size <= max_area)
+    if room_number and room_number != "":
+        room_number = int(room_number)
+        query = query.filter(models.Property.bedrooms == room_number)
     # if property_type:
     #     query = query.filter(models.Property.property_type == property_type)
 
@@ -698,43 +745,3 @@ async def advisor_search(
         "page": page,
         "query_string": query_string
     })
-
-
-@app.get("/advisor/properties/my", response_class=HTMLResponse)
-async def my_properties(
-        request: Request,
-        db: Session = Depends(get_db),
-        current_user: models.User = Depends(dependencies.get_current_user)
-):
-    # فقط ملک‌هایی که با این مشاور ثبت شدن
-    properties = db.query(models.Property).filter(models.Property.adviosor_id == current_user.id).all()
-
-    return templates.TemplateResponse("advisor_properties_list.html", {
-        "request": request,
-        "properties": properties
-    })
-@app.get("/advisor/property/view/{property_id}", response_class=HTMLResponse)
-async def view_property_for_advisor(
-    property_id: int,
-    request: Request,
-    db: Session = Depends(get_db)
-):
-    # دریافت ملک
-    property = db.query(models.Property).filter(models.Property.id == property_id).first()
-    if not property:
-        raise HTTPException(status_code=404, detail="ملک یافت نشد")
-
-    # دریافت مشاور
-    advisor = db.query(models.User).filter(models.User.id == property.adviosor_id).first()
-    if not advisor:
-        raise HTTPException(status_code=404, detail="مشاور یافت نشد")
-
-    return templates.TemplateResponse("advisor_property_view.html", {
-        "request": request,
-        "property": property,
-        "advisor": advisor
-    })
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}

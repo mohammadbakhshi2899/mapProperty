@@ -269,7 +269,6 @@
                 <option value="">همه نقش‌ها</option>
                 <option value="admin" {% if request.query_params.get('role') == 'admin' %}selected{% endif %}>ادمین</option>
                 <option value="advisor" {% if request.query_params.get('role') == 'advisor' %}selected{% endif %}>مشاور</option>
-                <option value="user" {% if request.query_params.get('role') == 'user' %}selected{% endif %}>کاربر عادی</option>
             </select>
             <button type="submit">جستجو</button>
             <button type="button" onclick="resetSearch()">حذف فیلتر</button>
@@ -298,7 +297,7 @@
                             <td>{{ user.role }}</td>
                             <td>
                                 <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
-                                    {% if user.is_active %}فعال{% else %}غیرفعال{% endif %}
+                                    {% if user.status == "active" %}فعال{% else %}غیرفعال{% endif %}
                                 </span>
                             </td>
                             <td class="actions">
