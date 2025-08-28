@@ -53,6 +53,7 @@ async def create_user(
     name:str = Form(...),
     family:str = Form(...),
     role: str = Form(...),
+    phone:str = Form(...),
     status: str = Form(...),
     db: Session = Depends(get_db),
         admin:models.User = Depends(dependencies.get_current_admin)
@@ -72,7 +73,8 @@ async def create_user(
         role=role,
         status=status,
         name=name,
-        family=family
+        family=family,
+        phone=phone
     )
 
     db.add(new_user)
@@ -106,7 +108,6 @@ async def update_user(
     user.phone = phone
     user.role = role
     user.status = status
-
     db.commit()
     return RedirectResponse(url="/admin/users", status_code=303)
 
