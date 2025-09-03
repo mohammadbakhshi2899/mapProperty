@@ -292,9 +292,20 @@ async def property_map(request: Request, db: Session = Depends(get_db), admin:mo
     return templates.TemplateResponse("property_map_list.html", {"request": request, "properties": properties})
 
 @app.get("/admin/property/add", response_class=HTMLResponse)
-async def create_property(request: Request, user: models.User = Depends(dependencies.get_current_user)):
+async def create_property(request: Request, user: models.User = Depends(dependencies.get_current_user), db: Session = Depends(get_db)):
     if not user :
         return RedirectResponse(url="/", status_code=303)
+    if user.role == "admin":
+        advisors = []
+        advisors = db.query(models.User).filter(models.User.role == "advisor").all()
+        return (templates.TemplateResponse
+                    ("admin_property_add.html",
+                     {"request":
+                          request,
+                          "advisors": advisors,
+                          "current_user": user                        }
+                    )
+                )
     return templates.TemplateResponse("admin_property_add.html", {"request": request})
 
 
@@ -318,6 +329,7 @@ async def create_property(
     detailed_address: str = Form(None),
     amenities: List[str] = Form([]),
     description: str = Form(None),
+    advisor_id: int = Form(0),  # پیش‌فرض 0 یعنی خود ادمین
     db: Session = Depends(get_db),
     current_user: models.User = Depends(dependencies.get_current_user)
 ):
@@ -325,6 +337,9 @@ async def create_property(
     amenities_str = ",".join(amenities) if amenities else None
 
     # ایجاد ملک جدید
+    if advisor_id == 0:
+        advisor_id = current_user.id
+
     new_property = models.Property(
         title=title,
         locationOnMap= str(latitude)+","+str(longitude),
@@ -345,7 +360,7 @@ async def create_property(
         detailed_address=detailed_address,
         amenities=amenities_str,
         description=description,
-        adviosor_id= current_user.id
+        adviosor_id= advisor_id
     )
     print(new_property)
     db.add(new_property)
@@ -630,7 +645,7 @@ async def advisor_dashboard(request: Request, user: models.User = Depends(depend
 # فرم افزودن ملک
 @app.get("/advisor/property/add", response_class=HTMLResponse)
 async def advisor_add_property_form(request: Request,user: models.User = Depends(dependencies.get_current_user)):
-    return templates.TemplateResponse("admin_property_add.html", {"request": request})
+    return templates.TemplateResponse("advisor_property_add.html", {"request": request})
 
 
 @app.get("/advisor/properties/my", response_class=HTMLResponse)

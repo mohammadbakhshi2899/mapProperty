@@ -7,77 +7,74 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <!-- تضمین نمایش صحیح در موبایل -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
-            min-height: 250vh;
-            padding: 20px 10px; /* فاصله بهتر در موبایل */
+            background: linear-gradient(to right, #e3f2fd, #ffe0b2);
+            min-height: 300vh;
+            padding: 40px 20px;
+            color: #333;
         }
 
         .form-container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
+            margin: 40px auto;
+            padding: 30px;
             background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
         }
 
         h2 {
             text-align: center;
-            margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
             color: #333;
-            font-size: 20px;
+            font-size: 24px;
         }
 
-        /* گروه‌بندی فیلدها */
-        .grid-4-columns {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 12px;
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 16px;
+            background-color: #9e9e9e;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
-        .grid-3-columns {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 12px;
+        .back-btn:hover {
+            background-color: #757575;
         }
 
         label {
             display: block;
             font-weight: bold;
-            margin-bottom: 3px;
-            font-size: 13px;
+            margin-bottom: 6px;
+            font-size: 14px;
         }
 
         input[type="text"],
         input[type="number"],
+        input[type="tel"],
         select,
         textarea,
         #map {
             width: 100%;
-            padding: 7px;
-            font-size: 13px;
+            padding: 10px;
+            font-size: 14px;
             border: 1px solid #ccc;
             border-radius: 6px;
         }
 
-        /* نقشه — ارتفاع بیشتر، مخصوصاً در موبایل */
         #map {
-            min-height: 250px;
             height: 250px;
             border-radius: 6px;
             overflow: hidden;
@@ -86,37 +83,50 @@
 
         textarea {
             resize: vertical;
-            min-height: 60px;
-            font-size: 13px;
+            min-height: 100px;
+            font-size: 14px;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
-        /* امکانات */
+        .grid-4-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .grid-3-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
         .amenities {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
             justify-content: space-between;
         }
 
         .amenities label {
             flex: 1 1 23%;
-            min-width: 130px;
-            font-size: 13px;
+            min-width: 200px;
+            white-space: nowrap;
         }
 
         button[type="submit"] {
-            padding: 10px 18px;
+            padding: 12px 20px;
             background-color: #2196F3;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             width: 100%;
         }
 
@@ -124,7 +134,6 @@
             background-color: #1976D2;
         }
 
-        /* ریسپانسیو — موبایل و تبلت */
         @media (max-width: 992px) {
             .grid-4-columns,
             .grid-3-columns {
@@ -134,12 +143,16 @@
             .amenities label {
                 flex: 1 1 45%;
             }
+
+            #map {
+                height: 200px;
+            }
         }
 
         @media (max-width: 600px) {
             .form-container {
-                margin: 10px;
-                padding: 15px;
+                margin: 20px;
+                padding: 20px;
             }
 
             .grid-4-columns,
@@ -152,16 +165,11 @@
             }
 
             #map {
-                min-height: 250px;
-                height: 250px;
+                height: 180px;
             }
 
             h2 {
-                font-size: 18px;
-            }
-
-            body {
-                padding: 10px;
+                font-size: 20px;
             }
         }
     </style>
@@ -170,6 +178,7 @@
 
 <div class="form-container">
     <h2>سامانه ثبت ملک دقیق</h2>
+    <a href="/admin/dashboard" class="back-btn">بازگشت به داشبورد</a>
 
     <form method="post" action="/admin/property/add">
         <!-- عنوان ملک -->
@@ -185,8 +194,8 @@
         </div>
 
         <!-- مختصات جغرافیایی (مخفی) -->
-        <input type="hidden" id="latitude" name="latitude" required>
-        <input type="hidden" id="longitude" name="longitude" required>
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
 
         <!-- گروه 1: نوع ملک، وضعیت نما، قیمت کل، قیمت هر متر -->
         <div class="grid-4-columns">
@@ -198,7 +207,7 @@
                     <option value="ویلایی">ویلایی</option>
                     <option value="تجاری">تجاری</option>
                     <option value="پیش فروش">پیش فروش</option>
-                    <option value="پیش فروش">رهن و اجاره</option>
+                    <option value="رهن و اجاره">رهن و اجاره</option>
                 </select>
             </div>
             <div class="form-group">
@@ -233,9 +242,10 @@
                 <label>تعداد اتاق:</label>
                 <input type="number" name="bedrooms">
             </div>
+
         </div>
 
-        <!-- محله، طول، عرض، متراژ، وضعیت -->
+        <!-- محله، طول، عرض -->
         <div class="grid-4-columns">
             <div class="form-group">
                 <label>محله:</label>
@@ -249,8 +259,7 @@
                 <label>عرض (متر):</label>
                 <input type="number" name="width">
             </div>
-
-            <!-- متراژ -->
+             <!-- متراژ -->
             <div class="form-group">
                 <label>متراژ (متر مربع):</label>
                 <input type="number" name="size" placeholder="مثلاً: 85" required>
@@ -271,6 +280,7 @@
                 <label><input type="checkbox" name="amenities" value="انباری"> انباری</label>
                 <label><input type="checkbox" name="amenities" value="آسانسور"> آسانسور</label>
                 <label><input type="checkbox" name="amenities" value="استخر"> استخر</label>
+                <label><input type="checkbox" name="amenities" value="سونا و جکوزی"> سونا و جکوزی</label>
             </div>
         </div>
 
@@ -278,6 +288,24 @@
         <div class="form-group">
             <label>توضیحات:</label>
             <textarea name="description" placeholder="توضیحات بیشتر..."></textarea>
+        </div>
+
+        <!-- مشاور ثبت‌کننده -->
+        <div class="form-group">
+            <label>مشاور ثبت‌کننده:</label>
+            <select name="advisor_id">
+                <!-- اگر کاربر ادمین باشه، گزینه "خودم" رو اضافه کن -->
+                {% if current_user.role == "admin" %}
+                    <option value="0">خودم (ادمین)</option>
+                {% endif %}
+
+                <!-- لیست مشاوران -->
+                {% for advisor in advisors %}
+                    <option value="{{ advisor.id }}" {% if current_user.id == advisor.id %}selected{% endif %}>
+                        {{ advisor.username }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <!-- دکمه ثبت -->

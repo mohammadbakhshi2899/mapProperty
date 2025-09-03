@@ -18,10 +18,9 @@
 
         body {
             margin: 0;
-            padding: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f4f4;
-            min-height: 200vh;
+            min-height: 250vh;
             padding: 20px 10px; /* فاصله بهتر در موبایل */
         }
 
@@ -78,7 +77,7 @@
 
         /* نقشه — ارتفاع بیشتر، مخصوصاً در موبایل */
         #map {
-            min-height: 250px; /* حداقل ارتفاع در موبایل */
+            min-height: 250px;
             height: 250px;
             border-radius: 6px;
             overflow: hidden;
@@ -152,7 +151,6 @@
                 flex: 1 1 100%;
             }
 
-            /* اطمینان از ارتفاع کافی نقشه در موبایل */
             #map {
                 min-height: 250px;
                 height: 250px;
@@ -173,7 +171,7 @@
 <div class="form-container">
     <h2>سامانه ثبت ملک دقیق</h2>
 
-    <form method="post" action="/advisor/property/add">
+    <form method="post" action="/admin/property/add">
         <!-- عنوان ملک -->
         <div class="form-group">
             <label>عنوان ملک:</label>
@@ -187,8 +185,8 @@
         </div>
 
         <!-- مختصات جغرافیایی (مخفی) -->
-        <input type="hidden" id="latitude" name="latitude">
-        <input type="hidden" id="longitude" name="longitude">
+        <input type="hidden" id="latitude" name="latitude" required>
+        <input type="hidden" id="longitude" name="longitude" required>
 
         <!-- گروه 1: نوع ملک، وضعیت نما، قیمت کل، قیمت هر متر -->
         <div class="grid-4-columns">
@@ -200,6 +198,7 @@
                     <option value="ویلایی">ویلایی</option>
                     <option value="تجاری">تجاری</option>
                     <option value="پیش فروش">پیش فروش</option>
+                    <option value="پیش فروش">رهن و اجاره</option>
                 </select>
             </div>
             <div class="form-group">
@@ -236,8 +235,8 @@
             </div>
         </div>
 
-        <!-- محله، طول، عرض -->
-        <div class="grid-3-columns">
+        <!-- محله، طول، عرض، متراژ، وضعیت -->
+        <div class="grid-4-columns">
             <div class="form-group">
                 <label>محله:</label>
                 <input type="text" name="neighborhood" placeholder="مثلاً: دانشگاه (از وارد کردن کلماتی نظیر خیابان و بلوار و... خودداری کنید!)">
@@ -249,6 +248,12 @@
             <div class="form-group">
                 <label>عرض (متر):</label>
                 <input type="number" name="width">
+            </div>
+
+            <!-- متراژ -->
+            <div class="form-group">
+                <label>متراژ (متر مربع):</label>
+                <input type="number" name="size" placeholder="مثلاً: 85" required>
             </div>
         </div>
 
