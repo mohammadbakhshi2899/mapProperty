@@ -224,7 +224,7 @@
             <!-- متراژ -->
             <div class="form-group">
                 <label>متراژ (متر مربع):</label>
-                <input type="number" name="area" value="{{ property.size }}" required>
+                <input type="number" name="size" value="{{ property.size }}" required>
             </div>
 
             <!-- وضعیت فعال/غیرفعال -->
@@ -259,6 +259,19 @@
         <div class="form-group">
             <label>توضیحات:</label>
             <textarea name="description" placeholder="توضیحات بیشتر...">{{ property.description }}</textarea>
+        </div>
+          <!-- مشاور ثبت کننده -->
+        <div class="form-group">
+            <label>مشاور ثبت کننده:</label>
+            <select name="advisor_id" required>
+                <option value="">انتخاب کنید</option>
+                <option value="0" {% if property.adviosor_id == 0 %}selected{% endif %}>خودم (ادمین)</option>
+                {% for advisor in advisors %}
+                    <option value="{{ advisor.id }}" {% if property.adviosor_id == advisor.id %}selected{% endif %}>
+                        {{ advisor.username }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <!-- دکمه ذخیره -->

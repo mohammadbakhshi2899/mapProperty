@@ -572,7 +572,8 @@ async def edit_property(prop_id: int, request: Request, db: Session = Depends(ge
     prop = db.query(models.Property).filter(models.Property.id == prop_id).first()
     if not prop:
         raise HTTPException(status_code=404, detail="ملک یافت نشد")
-    return templates.TemplateResponse("admin_property_edit.html", {"request": request, "property": prop})
+    advisors = db.query(models.User).filter(models.User.role == "advisor").all()
+    return templates.TemplateResponse("admin_property_edit.html", {"request": request, "property": prop , "advisors" : advisors})
 
 
 @app.post("/admin/property/update/{prop_id}", response_class=RedirectResponse)
@@ -589,7 +590,7 @@ async def update_property(
     builtYear: int = Form(...),
     units_in_building: int = Form(None),
     bedrooms: int = Form(None),
-    area: int = Form(None),
+    size: int = Form(None),
     length: int = Form(...),
     width: int = Form(...),
     neighborhood: str = Form(...),
@@ -598,6 +599,7 @@ async def update_property(
     amenities: list = Form([]),
     description: str = Form(None),
     db: Session = Depends(get_db),
+    advisor_id: int = Form(),
     user: models.User = Depends(dependencies.get_current_user)
 ):
     property = db.query(models.Property).filter(models.Property.id == prop_id).first()
@@ -623,7 +625,8 @@ async def update_property(
     property.amenities = ",".join(amenities) if amenities else None
     property.description = description
     property.status = status
-    property.size = area
+    property.size = size
+    property.adviosor_id = advisor_id
 
     db.commit()
     if user.role == "admin":
