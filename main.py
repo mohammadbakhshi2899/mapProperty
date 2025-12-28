@@ -296,13 +296,10 @@ async def create_property(request: Request, user: models.User = Depends(dependen
     if not user :
         return RedirectResponse(url="/", status_code=303)
     if user.role == "admin":
-        advisors = []
-        advisors = db.query(models.User).filter(models.User.role == "advisor").all()
         return (templates.TemplateResponse
                     ("admin_property_add.html",
                      {"request":
                           request,
-                          "advisors": advisors,
                           "current_user": user                        }
                     )
                 )
@@ -566,7 +563,21 @@ async def view_property(prop_id: int, request: Request, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="ملک یافت نشد")
     return templates.TemplateResponse("admin_property_view.html", {"request": request, "prop": prop})
 
+@app.get("/api/advisors")
+async def get_advisors(db: Session = Depends(get_db)):
+    try:
+        # فقط کاربرانی که نقششون "advisor" هست
+        advisors = db.query(models.User).all()
 
+        # اگر مشاوری وجود نداشته باشه
+        if not advisors:
+            return []
+
+        # بازگرداندن لیست مشاوران به شکل JSON
+        return [{"id": advisor.id, "username": advisor.username} for advisor in advisors]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="خطا در بارگذاری لیست مشاوران")
 @app.get("/admin/property/edit/{prop_id}", response_class=HTMLResponse)
 async def edit_property(prop_id: int, request: Request, db: Session = Depends(get_db), user: models.User = Depends(dependencies.get_current_user)):
     prop = db.query(models.Property).filter(models.Property.id == prop_id).first()

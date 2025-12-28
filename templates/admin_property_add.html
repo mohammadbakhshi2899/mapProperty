@@ -291,20 +291,12 @@
         </div>
 
         <!-- مشاور ثبت‌کننده -->
-        <div class="form-group">
-            <label>مشاور ثبت‌کننده:</label>
-            <select name="advisor_id">
-                <!-- اگر کاربر ادمین باشه، گزینه "خودم" رو اضافه کن -->
-                {% if current_user.role == "admin" %}
-                    <option value="0">خودم (ادمین)</option>
-                {% endif %}
-
-                <!-- لیست مشاوران -->
-                {% for advisor in advisors %}
-                    <option value="{{ advisor.id }}" {% if current_user.id == advisor.id %}selected{% endif %}>
-                        {{ advisor.username }}
-                    </option>
-                {% endfor %}
+        < <div class="form-group">
+            <label>مشاور ثبت کننده:</label>
+            <select name="advisor_id" id="advisorSelect">
+                <option value="">انتخاب کنید</option>
+                <option value="0">خودم (ادمین)</option>
+                <!-- اینجا بعداً مشاوران لود میشن -->
             </select>
         </div>
 
@@ -339,6 +331,38 @@
             marker = L.marker(e.latlng).addTo(map);
         }
     });
+
+    async function loadAdvisors() {
+        try {
+            const response = await fetch('/api/advisors');
+            if (!response.ok) {
+                throw new Error('خطا در دریافت لیست مشاوران');
+            }
+            const advisors = await response.json();
+
+            const advisorSelect = document.getElementById('advisorSelect');
+
+            advisors.forEach(advisor => {
+                const option = document.createElement('option');
+                option.value = advisor.id;
+                option.textContent = advisor.username;
+                advisorSelect.appendChild(option);
+            });
+
+            // انتخاب مشاور فعلی
+            const currentAdvisorId = {{ current_user.id or 'null' }};
+            if (currentAdvisorId !== null) {
+                advisorSelect.value = currentAdvisorId;
+            }
+
+        } catch (error) {
+            console.error("خطا در بارگذاری مشاوران:", error);
+            alert("خطا در بارگذاری لیست مشاوران. لطفاً صفحه را رفرش کنید.");
+        }
+    }
+
+    // بارگذاری مشاوران وقتی صفحه لود شد
+    document.addEventListener('DOMContentLoaded', loadAdvisors);
 </script>
 
 </body>
